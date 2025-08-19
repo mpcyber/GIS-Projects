@@ -31,7 +31,7 @@ function initMap() {
             ],
             disableDefaultUI: true
         });
-        
+
         directionsService = new google.maps.DirectionsService();
         directionsRenderer = new google.maps.DirectionsRenderer({
             map: map,
@@ -42,7 +42,7 @@ function initMap() {
                 strokeWeight: 5
             }
         });
-        
+
         isGoogleMapsLoaded = true;
         console.log('Google Maps API loaded successfully!');
     } catch (error) {
@@ -74,8 +74,6 @@ async function calculateRoutes() {
         setTimeout(() => {
             if (checkGoogleMapsLoaded()) {
                 console.log('Google Maps loaded on retry!');
-                // No need to call closeResults here, as showLoading will prepare for new results
-                // and if it's already showing error, it will be replaced.
             }
         }, 2000);
         return;
@@ -84,6 +82,10 @@ async function calculateRoutes() {
     const origin = '12907 Swedes Street, Centreville, VA';
     const destination = 'Lucky Strike, Centreville, VA';
     
+    // Correct waypoints using full addresses
+    const waypoint1 = '13814 Lee Hwy, Centreville, VA';
+    const waypoint2 = 'Leland Road, Centreville, VA';
+    
     try {
         // Show loading state and activate map container
         showLoading();
@@ -91,8 +93,8 @@ async function calculateRoutes() {
         
         // Calculate both routes
         const [route1, route2] = await Promise.all([
-            calculateRoute(origin, destination, 'Lee Highway, Centreville, VA'),
-            calculateRoute(origin, destination, 'Leland Road, Centreville, VA')
+            calculateRoute(origin, destination, waypoint1),
+            calculateRoute(origin, destination, waypoint2)
         ]);
         
         route1Data = {
@@ -112,11 +114,11 @@ async function calculateRoutes() {
         const route2Minutes = parseDuration(route2Data.duration);
         
         if (route1Minutes <= route2Minutes) {
-            await displayRouteOnMap(origin, destination, 'Lee Highway, Centreville, VA', route1Data.color);
+            await displayRouteOnMap(origin, destination, waypoint1, route1Data.color);
             route1Data.isBest = true;
             route2Data.isBest = false; // Explicitly set false for the other route
         } else {
-            await displayRouteOnMap(origin, destination, 'Leland Road, Centreville, VA', route2Data.color);
+            await displayRouteOnMap(origin, destination, waypoint2, route2Data.color);
             route2Data.isBest = true;
             route1Data.isBest = false; // Explicitly set false for the other route
         }
